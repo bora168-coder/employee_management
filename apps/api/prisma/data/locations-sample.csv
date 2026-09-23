@@ -1,0 +1,41 @@
+level,code,parent_code,name_kh,name_en
+province,01,,ខេត្តបន្ទាយមានជ័យ,Banteay Meanchey
+province,02,,ខេត្តបាត់ដំបង,Battambang
+province,03,,ខេត្តកំពង់ចាម,Kampong Cham
+province,04,,ខេត្តកំពង់ឆ្នាំង,Kampong Chhnang
+province,05,,ខេត្តកំពង់ស្ពឺ,Kampong Speu
+province,06,,ខេត្តកំពង់ធំ,Kampong Thom
+province,07,,ខេត្តកំពត,Kampot
+province,08,,ខេត្តកណ្តាល,Kandal
+province,09,,ខេត្តកោះកុង,Koh Kong
+province,10,,ខេត្តក្រចេះ,Kratie
+province,11,,ខេត្តមណ្ឌលគិរី,Mondul Kiri
+province,12,,រាជធានីភ្នំពេញ,Phnom Penh
+province,13,,ខេត្តព្រះវិហារ,Preah Vihear
+province,14,,ខេត្តព្រៃវែង,Prey Veng
+province,15,,ខេត្តពោធិ៍សាត់,Pursat
+province,16,,ខេត្តរតនគិរី,Ratanak Kiri
+province,17,,ខេត្តសៀមរាប,Siem Reap
+province,18,,ខេត្តព្រះសីហនុ,Preah Sihanouk
+province,19,,ខេត្តស្ទឹងត្រែង,Stung Treng
+province,20,,ខេត្តស្វាយរៀង,Svay Rieng
+province,21,,ខេត្តតាកែវ,Takeo
+province,22,,ខេត្តឧត្តរមានជ័យ,Oddar Meanchey
+province,23,,ខេត្តកែប,Kep
+province,24,,ខេត្តប៉ៃលិន,Pailin
+province,25,,ខេត្តត្បូងឃ្មុំ,Tboung Khmum
+district,0501,05,ស្រុកបរសេដ្ឋ,Basedth
+district,0502,05,ក្រុងច្បារមន,Chbar Mon
+district,0503,05,ស្រុកគងពិសី,Kong Pisei
+district,0504,05,ស្រុកឱរ៉ាល់,Aoral
+district,0505,05,ស្រុកឧដុង្គ,Odongk
+district,0506,05,ស្រុកភ្នំស្រួច,Phnom Sruoch
+district,0507,05,ស្រុកសំរោងទង,Samraong Tong
+district,0508,05,ស្រុកថ្ពង,Thpong
+commune,050801,0508,ឃុំអមលាំង,Amleang
+commune,050802,0508,ឃុំមនោរម្យ,Monourom
+commune,050803,0508,ឃុំប្រាំបីមុំ,Prambei Mom
+commune,050804,0508,ឃុំរុងរឿង,Rung Roeang
+commune,050805,0508,ឃុំទ័ពមាន,Toap Mean
+commune,050806,0508,ឃុំវាលពន់,Veal Pon
+commune,050807,0508,ឃុំយាអង្គ,Yea Angk

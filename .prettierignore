@@ -1,0 +1,10 @@
+node_modules
+dist
+.next
+coverage
+pnpm-lock.yaml
+apps/api/prisma/migrations
+test-results
+playwright-report
+storage
+*.md

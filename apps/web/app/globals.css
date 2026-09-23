@@ -1,0 +1,13 @@
+@import 'tailwindcss';
+@import '@fontsource/kantumruy-pro/400.css';
+@import '@fontsource/kantumruy-pro/600.css';
+
+@theme {
+  --font-sans: 'Kantumruy Pro', ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  @apply bg-slate-50 text-slate-900 antialiased;
+  /* Khmer script needs a little more line height */
+  line-height: 1.7;
+}

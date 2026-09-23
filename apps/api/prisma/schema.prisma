@@ -1,0 +1,406 @@
+// Civil Servant Biography Management System — database schema.
+// Sections follow the official form ជីវប្រវត្តិមន្ត្រីរាជការ (ក, ខ, គ, ឃ, ង).
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [pg_trgm]
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum RecordStatus {
+  DRAFT
+  SUBMITTED
+  VERIFIED
+}
+
+enum Role {
+  SUPER_ADMIN
+  HR_ADMIN
+  UNIT_HEAD
+  VIEWER
+}
+
+enum EducationCategory {
+  GENERAL
+  PROFESSIONAL
+  FOREIGN_LANGUAGE
+  ONGOING_TRAINING
+}
+
+enum WorkSector {
+  MINISTRY_OF_INTERIOR
+  OTHER_PUBLIC
+  PRIVATE_OR_NGO
+}
+
+enum AwardType {
+  AWARD
+  DISCIPLINE
+}
+
+enum FamilyRelation {
+  SPOUSE
+  FATHER
+  MOTHER
+}
+
+enum AttachmentCategory {
+  CERTIFICATE
+  SIGNED_FORM
+  OTHER
+}
+
+// ---------- Location reference (Cambodian gazetteer) ----------
+
+model Province {
+  code      String     @id
+  nameKh    String
+  nameEn    String
+  districts District[]
+
+  @@map("province")
+}
+
+model District {
+  code         String    @id
+  nameKh       String
+  nameEn       String
+  provinceCode String
+  province     Province  @relation(fields: [provinceCode], references: [code])
+  communes     Commune[]
+
+  @@index([provinceCode])
+  @@map("district")
+}
+
+model Commune {
+  code         String    @id
+  nameKh       String
+  nameEn       String
+  districtCode String
+  district     District  @relation(fields: [districtCode], references: [code])
+  villages     Village[]
+
+  @@index([districtCode])
+  @@map("commune")
+}
+
+model Village {
+  code        String  @id
+  nameKh      String
+  nameEn      String
+  communeCode String
+  commune     Commune @relation(fields: [communeCode], references: [code])
+
+  @@index([communeCode])
+  @@map("village")
+}
+
+// ---------- Organization & reference data ----------
+
+model OrganizationUnit {
+  id        String             @id @default(uuid())
+  nameKh    String
+  nameEn    String?
+  parentId  String?
+  parent    OrganizationUnit?  @relation("UnitTree", fields: [parentId], references: [id], onDelete: Restrict)
+  children  OrganizationUnit[] @relation("UnitTree")
+  employees Employee[]
+  users     User[]
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  @@index([parentId])
+  @@map("organization_unit")
+}
+
+model Position {
+  id            String        @id @default(uuid())
+  nameKh        String        @unique
+  nameEn        String?
+  workHistories WorkHistory[]
+
+  @@map("position")
+}
+
+/// Civil service framework, e.g. ខ.១.៤ / នាយកម្មការ / ថ្នាក់លេខ ៤
+model Rank {
+  id        String     @id @default(uuid())
+  framework String
+  titleKh   String
+  grade     Int
+  employees Employee[]
+
+  @@unique([framework, grade])
+  @@map("rank")
+}
+
+// ---------- Employee (header + section ក + section គ summary) ----------
+
+model Employee {
+  id                 String           @id @default(uuid())
+  status             RecordStatus     @default(DRAFT)
+  /// Optimistic locking: incremented on every change.
+  version            Int              @default(1)
+  organizationUnitId String
+  organizationUnit   OrganizationUnit @relation(fields: [organizationUnitId], references: [id])
+
+  civilServantId String? @unique /// លេខសម្គាល់មន្ត្រីរាជការ
+  nationalIdNo   String? @unique /// អត្តសញ្ញាណប័ណ្ណ
+  civilServantNo String? @unique /// អត្តលេខមន្ត្រីរាជការ
+  photoKey       String?
+
+  nameKh            String
+  nameLatin         String
+  gender            Gender
+  dateOfBirth       DateTime @db.Date
+  nationality       String   @default("ខ្មែរ")
+  birthProvinceCode String?
+  birthDistrictCode String?
+  birthCommuneCode  String?
+  birthVillageCode  String?
+
+  houseNo          String?
+  streetNo         String?
+  addrProvinceCode String?
+  addrDistrictCode String?
+  addrCommuneCode  String?
+  addrVillageCode  String?
+  phone1           String?
+  phone2           String?
+
+  // Section គ summary
+  civilServiceStartDate    DateTime? @db.Date /// ថ្ងៃចូលបម្រើការងារក្នុងក្របខ័ណ្ឌរដ្ឋ
+  currentPositionStartDate DateTime? @db.Date /// ថ្ងៃចូលកាន់មុខតំណែងបច្ចុប្បន្ន
+  specialty                String? /// ជំនាញវិជ្ជាជីវៈ
+  rankId                   String?
+  rank                     Rank?     @relation(fields: [rankId], references: [id], onDelete: Restrict)
+  rankYear                 Int?
+
+  // Section ង children counts
+  childrenFemale Int @default(0)
+  childrenMale   Int @default(0)
+
+  // Footer / workflow
+  declaredPlace String?
+  declaredDate  DateTime? @db.Date
+  submittedAt   DateTime?
+  verifiedById  String?
+  verifiedBy    User?     @relation("VerifiedBy", fields: [verifiedById], references: [id])
+  verifiedAt    DateTime?
+  returnComment String?
+
+  voterRegistration VoterRegistration?
+  educations        Education[]
+  workHistories     WorkHistory[]
+  awards            AwardDiscipline[]
+  familyMembers     FamilyMember[]
+  references        ReferencePerson[]
+  attachments       Attachment[]
+
+  createdById String?
+  createdBy   User?     @relation("CreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  @@index([organizationUnitId])
+  @@index([status])
+  @@index([nameKh(ops: raw("gin_trgm_ops"))], type: Gin, map: "employee_name_kh_trgm_idx")
+  @@index([nameLatin(ops: raw("gin_trgm_ops"))], type: Gin, map: "employee_name_latin_trgm_idx")
+  @@map("employee")
+}
+
+model VoterRegistration {
+  id             String   @id @default(uuid())
+  employeeId     String   @unique
+  employee       Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  voterNo        String? /// លេខរៀង
+  pollingStation String? /// ការិយាល័យបោះឆ្នោត
+  provinceCode   String?
+  districtCode   String?
+  communeCode    String?
+  villageCode    String?
+  year           Int?
+
+  @@map("voter_registration")
+}
+
+// ---------- Section ខ ----------
+
+model Education {
+  id            String            @id @default(uuid())
+  employeeId    String
+  employee      Employee          @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  category      EducationCategory
+  levelOrCourse String
+  institution   String?
+  certificate   String?
+  startDate     DateTime?         @db.Date
+  endDate       DateTime?         @db.Date
+  sortOrder     Int               @default(0)
+
+  @@index([employeeId])
+  @@map("education")
+}
+
+// ---------- Section គ ----------
+
+model WorkHistory {
+  id                    String     @id @default(uuid())
+  employeeId            String
+  employee              Employee   @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  sector                WorkSector
+  startDate             DateTime   @db.Date
+  /// null = current position
+  endDate               DateTime?  @db.Date
+  positionId            String?
+  position              Position?  @relation(fields: [positionId], references: [id], onDelete: Restrict)
+  positionText          String?
+  ministryOrInstitution String?
+  unit                  String?
+  sortOrder             Int        @default(0)
+
+  @@index([employeeId])
+  @@index([positionId])
+  @@map("work_history")
+}
+
+// ---------- Section ឃ ----------
+
+model AwardDiscipline {
+  id                    String    @id @default(uuid())
+  employeeId            String
+  employee              Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  type                  AwardType
+  documentRef           String?
+  date                  DateTime? @db.Date
+  ministryOrInstitution String?
+  kind                  String?
+  form                  String?
+  sortOrder             Int       @default(0)
+
+  @@index([employeeId])
+  @@map("award_discipline")
+}
+
+// ---------- Section ង ----------
+
+model FamilyMember {
+  id          String         @id @default(uuid())
+  employeeId  String
+  employee    Employee       @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  relation    FamilyRelation
+  name        String
+  isAlive     Boolean        @default(true)
+  dateOfBirth DateTime?      @db.Date
+  occupation  String?
+  address     String?
+  birthPlace  String?
+  phone1      String?
+  phone2      String?
+
+  @@unique([employeeId, relation])
+  @@map("family_member")
+}
+
+model ReferencePerson {
+  id         String   @id @default(uuid())
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  name       String
+  gender     Gender?
+  occupation String?
+  phone      String?
+  address    String?
+  sortOrder  Int      @default(1)
+
+  @@index([employeeId])
+  @@map("reference_person")
+}
+
+// ---------- Files, users, audit ----------
+
+model Attachment {
+  id           String             @id @default(uuid())
+  employeeId   String
+  employee     Employee           @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  objectKey    String
+  fileName     String
+  mimeType     String
+  sizeBytes    Int
+  category     AttachmentCategory
+  uploadedById String?
+  uploadedBy   User?              @relation(fields: [uploadedById], references: [id])
+  createdAt    DateTime           @default(now())
+
+  @@index([employeeId])
+  @@map("attachment")
+}
+
+model User {
+  id                 String            @id @default(uuid())
+  username           String            @unique
+  /// Argon2id hash
+  passwordHash       String
+  fullName           String
+  role               Role
+  organizationUnitId String?
+  organizationUnit   OrganizationUnit? @relation(fields: [organizationUnitId], references: [id], onDelete: Restrict)
+  isActive           Boolean           @default(true)
+  failedLoginCount   Int               @default(0)
+  lockedUntil        DateTime?
+  lastLoginAt        DateTime?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  refreshTokens     RefreshToken[]
+  auditLogs         AuditLog[]
+  attachments       Attachment[]
+  createdEmployees  Employee[]     @relation("CreatedBy")
+  verifiedEmployees Employee[]     @relation("VerifiedBy")
+
+  @@map("app_user")
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// SHA-256 of the token; the token itself is never stored.
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@map("refresh_token")
+}
+
+model AuditLog {
+  id        BigInt   @id @default(autoincrement())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String
+  entity    String
+  entityId  String
+  before    Json?
+  after     Json?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("audit_log")
+}
