@@ -1,5 +1,5 @@
 # Optional local tools: PostgreSQL 16 and MinIO (S3-compatible storage).
-# The apps themselves run with pnpm (dev) or PM2 (production).
+# The apps themselves run with npm (dev) or PM2 (production).
 #   docker compose up -d
 services:
   postgres:

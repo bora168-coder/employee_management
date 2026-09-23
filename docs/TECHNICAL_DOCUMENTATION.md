@@ -39,7 +39,7 @@
 | Rate limiting | `@nestjs/throttler` | `6` | Login: 10 tries/min per IP; all routes: 300/min |
 | Testing | Jest + Supertest (API), Vitest + Testing Library (web, shared), Playwright (browser) | — | Unit, integration, E2E |
 | Quality | ESLint 9 + Prettier 3 | — | Linting and formatting |
-| Monorepo | pnpm workspaces | `10` | `apps/web`, `apps/api`, `packages/shared` |
+| Monorepo | npm workspaces | `10` | `apps/web`, `apps/api`, `packages/shared` |
 | Process manager | PM2 | — | Production runtime for `web` and `api` |
 | Reverse proxy | Nginx | — | HTTPS; `/api/*` → API, everything else → web |
 | Containers | Docker Compose | Optional | Local PostgreSQL + MinIO |
@@ -399,7 +399,7 @@ erDiagram
 
 ### 6.4 Seed data
 
-`pnpm db:seed` adds: all 25 provinces, a **sample** of districts/communes (Kampong Speu), one rank (`ខ.១.៤ នាយកម្មការ`), common positions, an example unit tree, and the first super admin. It contains no personal data. Import the full official gazetteer with `import:locations` (see runbook 10).
+`npm run db:seed` adds: all 25 provinces, a **sample** of districts/communes (Kampong Speu), one rank (`ខ.១.៤ នាយកម្មការ`), common positions, an example unit tree, and the first super admin. It contains no personal data. Import the full official gazetteer with `import:locations` (see runbook 10).
 
 ### 6.5 Migration Rules
 
@@ -476,7 +476,7 @@ employees/{employeeId}/attachments/{attachmentId}
 
 The integration tests cover: login, lockout, token rotation and re-use detection, CSRF origin check, validation, duplicates, location checks, optimistic locking, unit scope, masking for VIEWER, the full workflow, audit trail, file type checks, PDF, reports scope, soft delete, admin rules.
 
-Quality gate (also in CI): `pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm --filter @csbms/api test:e2e && pnpm build`.
+Quality gate (also in CI): `npm run lint && npm run format:check && npm run typecheck && npm test && npm run test:e2e -w @csbms/api && npm run build`.
 
 ---
 
@@ -503,7 +503,7 @@ Files: `ecosystem.config.js` (PM2), `deploy/nginx.conf`, `docker-compose.yml` (o
 
 ### 11.3 Deployment Flow
 
-`scripts/deploy.sh`: `git pull` → `pnpm install --frozen-lockfile` → **backup** → `prisma migrate deploy` → `pnpm build` → `pm2 startOrReload` → health check (fails the deploy if not healthy).
+`scripts/deploy.sh`: `git pull` → `npm ci` → **backup** → `prisma migrate deploy` → `npm run build` → `pm2 startOrReload` → health check (fails the deploy if not healthy).
 
 ### 11.4 CI
 
@@ -565,7 +565,7 @@ packages/shared/src/        enums, schemas, utils (Khmer digits, phone), types
 ### 13.3 Adding a field to the form
 
 1. Add it to the Zod schema in `packages/shared` (and a test).
-2. Add the column in `schema.prisma` → `pnpm db:migrate`.
+2. Add the column in `schema.prisma` → `npm run db:migrate`.
 3. Map it in `employees.service.ts` (write) and `employee.mapper.ts` (read); add it to `EmployeeDetail`.
 4. Add the input in the step component and `to-form.ts`; add labels in `km.json` and `en.json`.
 5. Show it in `profile.tsx` and, if printed, in `biography-template.ts`.

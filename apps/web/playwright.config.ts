@@ -2,7 +2,7 @@ import { defineConfig } from '@playwright/test';
 
 /**
  * Browser tests against a running system (web + API + database).
- * Start both apps first, then: pnpm --filter @csbms/web test:e2e
+ * Start both apps first, then: npm run test:e2e -w @csbms/web
  */
 export default defineConfig({
   testDir: './e2e',

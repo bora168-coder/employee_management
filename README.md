@@ -24,26 +24,26 @@ docs/         technical documentation and runbooks
 
 ## Start on your computer
 
-You need **Node.js 22**, **pnpm 10** and **PostgreSQL 16** (or Docker).
+You need **Node.js 22** (with **npm 10**) and **PostgreSQL 16** (or Docker).
 
 ```bash
 # 1. Database (and optional MinIO) with Docker
 docker compose up -d postgres
 
 # 2. Install packages
-pnpm install
+npm install
 
 # 3. Settings (edit the files if needed)
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env
 
 # 4. Create the tables and first data (provinces, ranks, positions, admin user)
-pnpm --filter @csbms/shared build
-pnpm db:migrate
-pnpm db:seed
+npm run build -w @csbms/shared
+npm run db:migrate
+npm run db:seed
 
 # 5. Run both apps
-pnpm dev
+npm run dev
 ```
 
 Open http://localhost:3000 and log in with `SEED_ADMIN_USERNAME` / `SEED_ADMIN_PASSWORD` from `apps/api/.env` (default `admin` / `ChangeMe123!`). **Change this password at once** (menu: My account).
@@ -56,36 +56,36 @@ API documentation (Swagger, development only): http://localhost:4000/api/docs
 
 | Command | What it does |
 |---|---|
-| `pnpm dev` | Run API (port 4000) and web (port 3000) with reload |
-| `pnpm lint` / `pnpm format` | Check code / format code |
-| `pnpm typecheck` | TypeScript check of all packages |
-| `pnpm test` | Unit tests (shared, API, web) |
-| `pnpm --filter @csbms/api test:e2e` | API integration tests (needs a test database, see below) |
-| `pnpm --filter @csbms/web test:e2e` | Browser tests (needs the apps running) |
-| `pnpm build` | Production build |
-| `pnpm db:migrate` | Create and apply a new migration (development) |
-| `pnpm --filter @csbms/api import:locations file.csv` | Import the official location list |
+| `npm run dev` | Run API (port 4000) and web (port 3000) with reload |
+| `npm run lint` / `npm run format` | Check code / format code |
+| `npm run typecheck` | TypeScript check of all packages |
+| `npm test` | Unit tests (shared, API, web) |
+| `npm run test:e2e -w @csbms/api` | API integration tests (needs a test database, see below) |
+| `npm run test:e2e -w @csbms/web` | Browser tests (needs the apps running) |
+| `npm run build` | Production build |
+| `npm run db:migrate` | Create and apply a new migration (development) |
+| `npm run import:locations -w @csbms/api -- file.csv` | Import the official location list |
 
 ### Tests
 
-- **Unit tests:** `pnpm test`
+- **Unit tests:** `npm test`
 - **API integration tests** use a separate database that is **wiped** on every run:
 
   ```bash
   createdb -O csbms csbms_test
-  TEST_DATABASE_URL=postgresql://csbms:csbms@localhost:5432/csbms_test pnpm --filter @csbms/api test:e2e
+  TEST_DATABASE_URL=postgresql://csbms:csbms@localhost:5432/csbms_test npm run test:e2e -w @csbms/api
   ```
 
   Set `CHROMIUM_EXECUTABLE_PATH` to also test the real PDF.
-- **Browser tests:** start the apps, then `pnpm --filter @csbms/web test:e2e` (uses `E2E_USERNAME` / `E2E_PASSWORD`, default admin account).
+- **Browser tests:** start the apps, then `npm run test:e2e -w @csbms/web` (uses `E2E_USERNAME` / `E2E_PASSWORD`, default admin account).
 
 ## Production
 
 See Phase 11 in the technical documentation. Short version:
 
 ```bash
-# first time: install Node 22, pnpm, PostgreSQL 16, Nginx, PM2 and Chromium
-# (pnpm --filter @csbms/web exec playwright install --with-deps chromium)
+# first time: install Node 22, PostgreSQL 16, Nginx, PM2 and Chromium
+# (npx playwright install --with-deps chromium)
 cp apps/api/.env.example apps/api/.env   # set NODE_ENV=production, secrets, COOKIE_SECURE=true, WEB_ORIGIN
 cp apps/web/.env.example apps/web/.env
 ./scripts/deploy.sh                       # backup → migrate → build → pm2 reload → health check

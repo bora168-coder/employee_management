@@ -11,7 +11,7 @@ const prisma = new PrismaClient();
 
 async function main() {
   // 1. Locations: all provinces + sample districts/communes.
-  //    Replace with the full official gazetteer: pnpm --filter @csbms/api import:locations <file.csv>
+  //    Replace with the full official gazetteer: npm run import:locations -w @csbms/api -- <file.csv>
   const counts = await importLocationsCsv(
     prisma,
     path.join(__dirname, 'data', 'locations-sample.csv'),

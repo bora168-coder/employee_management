@@ -20,7 +20,8 @@ module.exports = {
     {
       name: 'csbms-web',
       cwd: './apps/web',
-      script: 'node_modules/next/dist/bin/next',
+      // npm workspaces may install Next.js in the root node_modules, so resolve it.
+      script: require.resolve('next/dist/bin/next', { paths: [`${__dirname}/apps/web`] }),
       args: 'start -p 3000',
       instances: 1,
       exec_mode: 'fork',

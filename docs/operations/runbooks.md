@@ -49,7 +49,7 @@ pm2 logs csbms-api --lines 5000 --nostream | grep '"statusCode":5'
 The API renders the form with Chromium.
 
 1. `pm2 logs csbms-api | grep -i chromium` — "Cannot start Chromium" means the browser is missing.
-2. Install it: `pnpm --filter @csbms/web exec playwright install --with-deps chromium`, or set `CHROMIUM_EXECUTABLE_PATH` in `apps/api/.env` to an installed Chromium/Chrome.
+2. Install it: `npx playwright install --with-deps chromium`, or set `CHROMIUM_EXECUTABLE_PATH` in `apps/api/.env` to an installed Chromium/Chrome.
 3. `pm2 restart csbms-api` and try again.
 
 ## 6. A user is locked out
@@ -95,7 +95,7 @@ Test a restore **once per month** on a separate server.
 The seed only contains all provinces and a **sample** of districts/communes for Kampong Speu. Import the full official list as CSV (`level,code,parent_code,name_kh,name_en`):
 
 ```bash
-pnpm --filter @csbms/api import:locations /path/to/gazetteer.csv
+npm run import:locations -w @csbms/api -- /path/to/gazetteer.csv
 ```
 
 The import can be run again safely (it updates existing codes).

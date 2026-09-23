@@ -3,23 +3,24 @@
   "private": true,
   "version": "0.1.0",
   "description": "Civil Servant Biography Management System (CSBMS)",
-  "packageManager": "pnpm@10.33.0",
   "engines": {
-    "node": ">=22"
+    "node": ">=22",
+    "npm": ">=10"
   },
   "scripts": {
-    "build": "pnpm -r --filter \"./packages/*\" build && pnpm -r --filter \"./apps/*\" build",
-    "dev": "pnpm --filter @csbms/shared build && pnpm -r --parallel --filter \"./apps/*\" dev",
+    "build": "npm run build -w @csbms/shared && npm run build -w @csbms/api -w @csbms/web",
+    "dev": "npm run build -w @csbms/shared && concurrently -n api,web -c blue,green \"npm run dev -w @csbms/api\" \"npm run dev -w @csbms/web\"",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "pnpm -r typecheck",
-    "test": "pnpm -r test",
-    "db:migrate": "pnpm --filter @csbms/api prisma:migrate",
-    "db:seed": "pnpm --filter @csbms/api prisma:seed"
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "db:migrate": "npm run prisma:migrate -w @csbms/api",
+    "db:seed": "npm run prisma:seed -w @csbms/api"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.0",
+    "concurrently": "^9.2.0",
     "eslint": "^9.39.0",
     "eslint-config-prettier": "^10.1.0",
     "eslint-plugin-react-hooks": "^5.2.0",
@@ -27,5 +28,9 @@
     "prettier": "^3.6.0",
     "typescript": "~5.9.0",
     "typescript-eslint": "^8.46.0"
-  }
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ]
 }

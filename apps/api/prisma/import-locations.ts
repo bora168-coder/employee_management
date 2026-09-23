@@ -1,6 +1,6 @@
 /**
  * Imports the official Cambodian gazetteer (provinces, districts, communes, villages).
- * Usage: pnpm --filter @csbms/api import:locations path/to/locations.csv
+ * Usage: npm run import:locations -w @csbms/api -- path/to/locations.csv
  */
 import { PrismaClient } from '@prisma/client';
 import { importLocationsCsv } from './locations-csv';

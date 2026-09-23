@@ -4,14 +4,14 @@
 set -euo pipefail
 
 git pull --ff-only
-pnpm install --frozen-lockfile
+npm ci
 
 # Back up the database before migrating.
 ./scripts/backup.sh
 
-pnpm --filter @csbms/shared build
-pnpm --filter @csbms/api exec prisma migrate deploy
-pnpm build
+npm run build -w @csbms/shared
+npm run prisma:deploy -w @csbms/api
+npm run build
 
 pm2 startOrReload ecosystem.config.js --update-env
 pm2 save

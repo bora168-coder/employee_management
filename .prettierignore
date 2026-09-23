@@ -2,7 +2,7 @@ node_modules
 dist
 .next
 coverage
-pnpm-lock.yaml
+package-lock.json
 apps/api/prisma/migrations
 test-results
 playwright-report
