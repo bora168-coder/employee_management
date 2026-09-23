@@ -36,7 +36,34 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): AppEnv {
       if (!result.data[key]) throw new Error(`${key} is required when STORAGE_DRIVER=s3`);
     }
   }
+  if (result.data.NODE_ENV === 'production') {
+    const weak = exampleSecretsIn(result.data);
+    if (weak.length)
+      throw new Error(`Example secrets are not allowed in production: ${weak.join(', ')}`);
+  }
   return result.data;
+}
+
+/** Values copied from .env.example or docker-compose defaults. */
+const EXAMPLE_SECRETS = ['change-me-access-secret-at-least-32-chars', 'minioadmin', 'csbms'];
+
+function exampleSecretsIn(env: AppEnv): string[] {
+  const weak: string[] = [];
+  if (EXAMPLE_SECRETS.includes(env.JWT_ACCESS_SECRET)) weak.push('JWT_ACCESS_SECRET');
+  const dbPassword = safeUrlPassword(env.DATABASE_URL);
+  if (dbPassword !== null && (dbPassword === '' || EXAMPLE_SECRETS.includes(dbPassword)))
+    weak.push('DATABASE_URL password');
+  if (env.STORAGE_DRIVER === 's3' && EXAMPLE_SECRETS.includes(env.S3_SECRET_KEY ?? ''))
+    weak.push('S3_SECRET_KEY');
+  return weak;
+}
+
+function safeUrlPassword(url: string): string | null {
+  try {
+    return decodeURIComponent(new URL(url).password);
+  } catch {
+    return null;
+  }
 }
 
 export const APP_ENV = Symbol('APP_ENV');

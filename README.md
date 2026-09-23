@@ -27,15 +27,17 @@ docs/         technical documentation and runbooks
 You need **Node.js 22** (with **npm 10**) and **PostgreSQL 16** (or Docker).
 
 ```bash
-# 1. Database (and optional MinIO) with Docker
+# 1. Settings: copy the examples, then set every CHANGE_ME / empty password
+#    (make passwords with: openssl rand -hex 24)
+cp .env.example .env                      # Docker: POSTGRES_PASSWORD, MINIO_ROOT_PASSWORD
+cp apps/api/.env.example apps/api/.env    # same passwords in DATABASE_URL, TEST_DATABASE_URL, S3_SECRET_KEY
+cp apps/web/.env.example apps/web/.env
+
+# 2. Database (and optional MinIO) with Docker
 docker compose up -d postgres
 
-# 2. Install packages
+# 3. Install packages
 npm install
-
-# 3. Settings (edit the files if needed)
-cp apps/api/.env.example apps/api/.env
-cp apps/web/.env.example apps/web/.env
 
 # 4. Create the tables and first data (provinces, ranks, positions, admin user)
 npm run build -w @csbms/shared

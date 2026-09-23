@@ -65,6 +65,8 @@ jobs:
         run: |
           cp apps/api/.env.example apps/api/.env
           sed -i 's/^JWT_ACCESS_SECRET=.*/JWT_ACCESS_SECRET=ci-secret-that-is-long-enough-1234567890/' apps/api/.env
+          # Throwaway CI database: its password is the service password above
+          sed -i 's/csbms:CHANGE_ME@/csbms:csbms@/' apps/api/.env
           cp apps/web/.env.example apps/web/.env
       - run: npm run build
       - name: Migrate and seed

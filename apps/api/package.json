@@ -13,7 +13,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
     "prisma:seed": "prisma db seed",
-    "import:locations": "ts-node --transpile-only prisma/import-locations.ts"
+    "import:locations": "ts-node --transpile-only prisma/import-locations.ts",
+    "admin:reset-password": "node --env-file=.env -r ts-node/register/transpile-only prisma/reset-admin-password.ts"
   },
   "prisma": {
     "seed": "ts-node --transpile-only prisma/seed.ts"

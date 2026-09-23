@@ -6,7 +6,7 @@ coverage/
 .env
 .env.*
 !.env.example
-storage/
+apps/api/storage/
 playwright-report/
 test-results/
 .turbo/
